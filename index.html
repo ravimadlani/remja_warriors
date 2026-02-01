@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ninja Runner Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Main Game Canvas -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Game UI Overlay -->
+        <div id="gameUI">
+            <!-- Top UI Bar -->
+            <div id="topBar">
+                <div id="scoreDisplay">
+                    <span class="label">SCORE</span>
+                    <span id="score">0</span>
+                </div>
+                <div id="levelDisplay">
+                    <span class="label">LEVEL</span>
+                    <span id="level">1</span>
+                </div>
+                <div id="healthDisplay">
+                    <span class="hearts">
+                        <span class="heart" data-heart="1">❤️</span>
+                        <span class="heart" data-heart="2">❤️</span>
+                        <span class="heart" data-heart="3">❤️</span>
+                    </span>
+                </div>
+                <button id="pauseBtn">⏸️</button>
+            </div>
+
+            <!-- Touch Controls for Mobile/iPad -->
+            <div id="touchControls">
+                <button id="jumpBtn" class="controlBtn">
+                    <span>JUMP</span>
+                </button>
+                <button id="slideBtn" class="controlBtn">
+                    <span>SLIDE</span>
+                </button>
+                <button id="attackBtn" class="controlBtn">
+                    <span>ATTACK</span>
+                </button>
+            </div>
+
+            <!-- Start Screen -->
+            <div id="startScreen" class="screen">
+                <h1>NINJA RUNNER</h1>
+                <p>Controls:</p>
+                <div class="controls-info">
+                    <p><strong>SPACE</strong> - Jump</p>
+                    <p><strong>DOWN</strong> - Slide</p>
+                    <p><strong>F</strong> - Attack</p>
+                </div>
+                <button id="startBtn" class="menuBtn">START GAME</button>
+            </div>
+
+            <!-- Pause Screen -->
+            <div id="pauseScreen" class="screen" style="display: none;">
+                <h2>PAUSED</h2>
+                <button id="resumeBtn" class="menuBtn">RESUME</button>
+                <button id="restartBtn" class="menuBtn">RESTART</button>
+            </div>
+
+            <!-- Game Over Screen -->
+            <div id="gameOverScreen" class="screen" style="display: none;">
+                <h2>GAME OVER</h2>
+                <p>Final Score: <span id="finalScore">0</span></p>
+                <p>Level Reached: <span id="finalLevel">1</span></p>
+                <button id="playAgainBtn" class="menuBtn">PLAY AGAIN</button>
+            </div>
+
+            <!-- Level Complete Screen -->
+            <div id="levelCompleteScreen" class="screen" style="display: none;">
+                <h2>LEVEL COMPLETE!</h2>
+                <p>Score: <span id="levelScore">0</span></p>
+                <button id="nextLevelBtn" class="menuBtn">NEXT LEVEL</button>
+            </div>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="loadingScreen">
+            <h2>LOADING...</h2>
+            <div class="loader"></div>
+            <p id="loadingProgress">0%</p>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

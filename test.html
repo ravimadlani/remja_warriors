@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ninja Runner - Quick Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #333;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        h2 { color: #ffd700; }
+        .test-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .test-item {
+            background: #444;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        img {
+            max-width: 150px;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ninja Runner Game - Asset Test</h1>
+
+    <h2>✅ Updates Completed:</h2>
+    <ul>
+        <li>🦘 Jump height increased (from -600 to -900 power)</li>
+        <li>🎨 Real obstacle graphics loaded</li>
+        <li>👹 Red enemy ninja that can be killed with shurikens</li>
+        <li>⭐ Improved shuriken graphics</li>
+    </ul>
+
+    <h2>🎮 Game Controls:</h2>
+    <ul>
+        <li>SPACE - Jump (now jumps higher!)</li>
+        <li>DOWN ARROW - Slide</li>
+        <li>F - Throw shuriken (kills red ninjas)</li>
+    </ul>
+
+    <div class="test-container">
+        <div class="test-item">
+            <h3>Background</h3>
+            <img src="assets/backgrounds/level1.png" alt="Level 1 Background">
+            <p>Candy Land Theme</p>
+        </div>
+
+        <div class="test-item">
+            <h3>Player Ninja</h3>
+            <img src="assets/characters/Run__000.png" alt="Ninja">
+            <p>Purple Ninja (Player)</p>
+        </div>
+
+        <div class="test-item">
+            <h3>Enemy Ninja</h3>
+            <img src="assets/characters/Run__000.png" style="filter: hue-rotate(240deg) saturate(2);" alt="Enemy">
+            <p>Red Ninja (Enemy)</p>
+        </div>
+
+        <div class="test-item">
+            <h3>Spikes</h3>
+            <img src="assets/obstacles/spikes.png" alt="Spikes">
+            <p>Jump or die!</p>
+        </div>
+
+        <div class="test-item">
+            <h3>Fire</h3>
+            <img src="assets/obstacles/fire.png" alt="Fire">
+            <p>Avoid the flames!</p>
+        </div>
+
+        <div class="test-item">
+            <h3>Rock</h3>
+            <img src="assets/obstacles/rock.png" alt="Rock">
+            <p>Big boulder!</p>
+        </div>
+    </div>
+
+    <h2>🚀 Play the Game:</h2>
+    <p><a href="index.html" style="color: #ffd700; font-size: 20px;">Click here to play the updated game!</a></p>
+</body>
+</html>
