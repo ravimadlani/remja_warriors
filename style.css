@@ -111,47 +111,23 @@ body {
     transform: scale(1.1);
 }
 
-/* Touch Controls */
-#touchControls {
-    display: none;
+/* Touch hint for swipe feedback */
+#touchHint {
     position: absolute;
-    bottom: 30px;
-    left: 20px;
-    right: 20px;
-    pointer-events: auto;
-    z-index: 10;
-}
-
-.controlBtn {
-    position: absolute;
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    border: 2px solid #ffd700;
-    padding: 20px 30px;
-    border-radius: 15px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.controlBtn:active {
-    background: rgba(255, 215, 0, 0.3);
-    transform: scale(0.95);
-}
-
-#jumpBtn {
-    left: 20px;
-}
-
-#slideBtn {
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    color: rgba(255, 215, 0, 0.8);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 15;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-#attackBtn {
-    right: 20px;
+#touchHint.show {
+    opacity: 1;
 }
 
 /* Screens */
@@ -314,24 +290,13 @@ body {
 }
 
 @media (max-width: 480px) {
-    .controlBtn {
-        padding: 12px 20px;
-        font-size: 12px;
+    #instructions {
+        padding: 15px;
     }
 
-    #jumpBtn {
-        left: 10px;
-    }
-
-    #attackBtn {
-        right: 10px;
-    }
-}
-
-/* Touch Device Detection */
-@media (pointer: coarse) {
-    #touchControls {
-        display: block;
+    .instructions-content {
+        flex-direction: column;
+        gap: 15px;
     }
 }
 
@@ -341,12 +306,53 @@ body {
         top: 5px;
     }
 
-    #touchControls {
-        bottom: 10px;
+    #instructions {
+        display: none;
     }
+}
 
-    .controlBtn {
-        padding: 10px 20px;
-        font-size: 12px;
-    }
+/* Instructions Section */
+#instructions {
+    width: 100%;
+    max-width: 1024px;
+    margin: 20px auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.instructions-content {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px 30px;
+    border-radius: 15px;
+    color: white;
+    min-width: 200px;
+}
+
+.control-group h3 {
+    color: #ffd700;
+    margin-bottom: 15px;
+    font-size: 18px;
+    text-align: center;
+}
+
+.control-group p {
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.control-group strong {
+    color: #ffd700;
+}
+
+.speed-note {
+    color: #ffd700;
+    font-size: 14px;
+    margin-bottom: 15px;
 }

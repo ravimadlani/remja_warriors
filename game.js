@@ -16,6 +16,11 @@ class Game {
         this.levelDistance = 0;
         this.levelGoal = 42000; // Distance to complete each level (at least 1 minute per level)
 
+        // Survival time and speed scaling
+        this.survivalTime = 0;
+        this.speedMultiplier = 1;
+        this.lastSpeedIncreaseTime = 0;
+
         // Time management
         this.lastTime = 0;
         this.deltaTime = 0;
@@ -54,6 +59,14 @@ class Game {
             obstacles: {},
             items: {},
             effects: {}
+        };
+
+        // Debug settings
+        this.debug = {
+            showHitboxes: false,       // Show collision boxes for all objects
+            showObstacleHitboxes: false, // Show hitboxes for obstacles specifically
+            showPlayerHitbox: false,   // Show hitbox for player
+            showEnemyHitboxes: false   // Show hitboxes for enemies
         };
 
         // Initialize
@@ -214,26 +227,57 @@ class Game {
             }
         });
 
-        // Touch controls
-        document.getElementById('jumpBtn').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (this.state === 'playing') this.ninja.jump();
-        });
+        // Touch/Swipe controls for mobile
+        let touchStartY = 0;
+        let touchStartX = 0;
+        let touchStartTime = 0;
+        const touchHint = document.getElementById('touchHint');
 
-        document.getElementById('slideBtn').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (this.state === 'playing') this.ninja.startSlide();
-        });
+        const showTouchHint = (text) => {
+            touchHint.textContent = text;
+            touchHint.classList.add('show');
+            setTimeout(() => touchHint.classList.remove('show'), 300);
+        };
 
-        document.getElementById('slideBtn').addEventListener('touchend', (e) => {
+        this.canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            if (this.state === 'playing') this.ninja.endSlide();
-        });
+            touchStartY = e.touches[0].clientY;
+            touchStartX = e.touches[0].clientX;
+            touchStartTime = Date.now();
+        }, { passive: false });
 
-        document.getElementById('attackBtn').addEventListener('touchstart', (e) => {
+        this.canvas.addEventListener('touchend', (e) => {
             e.preventDefault();
-            if (this.state === 'playing') this.ninja.attack();
-        });
+            if (this.state !== 'playing') return;
+
+            const touchEndY = e.changedTouches[0].clientY;
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchDuration = Date.now() - touchStartTime;
+            const deltaY = touchStartY - touchEndY;
+            const deltaX = Math.abs(touchStartX - touchEndX);
+
+            const swipeThreshold = 30;
+            const tapThreshold = 10;
+
+            // Check if it's a swipe or tap
+            if (Math.abs(deltaY) > swipeThreshold && Math.abs(deltaY) > deltaX) {
+                if (deltaY > 0) {
+                    // Swipe up - Jump
+                    this.ninja.jump();
+                    showTouchHint('JUMP');
+                } else {
+                    // Swipe down - Slide
+                    this.ninja.startSlide();
+                    showTouchHint('SLIDE');
+                    // Auto-release slide after 500ms
+                    setTimeout(() => this.ninja.endSlide(), 500);
+                }
+            } else if (Math.abs(deltaY) < tapThreshold && Math.abs(deltaX) < tapThreshold && touchDuration < 300) {
+                // Tap - Attack
+                this.ninja.attack();
+                showTouchHint('ATTACK');
+            }
+        }, { passive: false });
 
         // Menu buttons
         document.getElementById('startBtn').addEventListener('click', () => this.startGame());
@@ -255,6 +299,9 @@ class Game {
         this.score = 0;
         this.health = 3;
         this.levelDistance = 0;
+        this.survivalTime = 0;
+        this.speedMultiplier = 1;
+        this.lastSpeedIncreaseTime = 0;
         this.loadLevel(this.currentLevel);
         document.getElementById('startScreen').style.display = 'none';
         this.updateUI();
@@ -326,9 +373,22 @@ class Game {
     }
 
     update(dt) {
-        // Update level distance
+        // Update survival time and score
+        this.survivalTime += dt;
+        this.score = Math.floor(this.survivalTime);
+
+        // Speed up by 10% and increase level every 30 seconds
+        if (this.survivalTime - this.lastSpeedIncreaseTime >= 30) {
+            this.speedMultiplier *= 1.1;
+            this.lastSpeedIncreaseTime = this.survivalTime;
+            this.currentLevel = Math.min(this.currentLevel + 1, 9);
+            this.updateUI();
+        }
+
+        // Update level distance with speed multiplier
         const config = this.levelConfig[this.currentLevel];
-        this.levelDistance += config.speed * dt;
+        const currentSpeed = config.speed * this.speedMultiplier;
+        this.levelDistance += currentSpeed * dt;
 
         // Check level completion
         if (this.levelDistance >= this.levelGoal) {
@@ -340,12 +400,12 @@ class Game {
         this.spawnObjects();
 
         // Update game objects
-        this.background.update(dt, config.speed);
+        this.background.update(dt, currentSpeed);
         this.ninja.update(dt);
 
         // Update obstacles
         for (let i = this.obstacles.length - 1; i >= 0; i--) {
-            this.obstacles[i].update(dt, config.speed);
+            this.obstacles[i].update(dt, currentSpeed);
             if (this.obstacles[i].x < -100) {
                 this.obstacles.splice(i, 1);
             } else if (this.checkCollision(this.ninja, this.obstacles[i])) {
@@ -355,8 +415,9 @@ class Game {
         }
 
         // Update enemies
+        const currentEnemySpeed = config.enemySpeed * this.speedMultiplier;
         for (let i = this.enemies.length - 1; i >= 0; i--) {
-            this.enemies[i].update(dt, config.enemySpeed);
+            this.enemies[i].update(dt, currentEnemySpeed);
             if (this.enemies[i].x < -100) {
                 this.enemies.splice(i, 1);
             } else if (this.checkCollision(this.ninja, this.enemies[i])) {
@@ -367,7 +428,7 @@ class Game {
 
         // Update items
         for (let i = this.items.length - 1; i >= 0; i--) {
-            this.items[i].update(dt, config.speed);
+            this.items[i].update(dt, currentSpeed);
             if (this.items[i].x < -50) {
                 this.items.splice(i, 1);
             } else if (this.checkCollision(this.ninja, this.items[i])) {
@@ -385,10 +446,8 @@ class Game {
                 // Check projectile-enemy collision
                 for (let j = this.enemies.length - 1; j >= 0; j--) {
                     if (this.checkCollision(this.projectiles[i], this.enemies[j])) {
-                        this.score += 50;
                         this.enemies.splice(j, 1);
                         this.projectiles.splice(i, 1);
-                        this.updateUI();
                         break;
                     }
                 }
@@ -402,30 +461,34 @@ class Game {
                 this.effects.splice(i, 1);
             }
         }
+
+        // Update UI to show current survival time
+        this.updateUI();
     }
 
     spawnObjects() {
         const currentTime = Date.now();
         const config = this.levelConfig[this.currentLevel];
+        const adjustedSpawnRate = config.spawnRate / this.speedMultiplier;
 
         // Spawn obstacles
-        if (currentTime - this.lastObstacleSpawn > config.spawnRate) {
+        if (currentTime - this.lastObstacleSpawn > adjustedSpawnRate) {
             this.lastObstacleSpawn = currentTime;
             const types = ['spikes', 'branch', 'fire', 'rock'];
             const type = types[Math.floor(Math.random() * types.length)];
             this.obstacles.push(new Obstacle(this, type));
         }
 
-        // Spawn enemies
-        if (currentTime - this.lastEnemySpawn > config.spawnRate * 1.5) {
+        // Spawn enemies (more frequently)
+        if (currentTime - this.lastEnemySpawn > adjustedSpawnRate * 0.8) {
             this.lastEnemySpawn = currentTime;
-            if (Math.random() < 0.5) {
+            if (Math.random() < 0.7) {
                 this.enemies.push(new Enemy(this));
             }
         }
 
         // Spawn items
-        if (currentTime - this.lastItemSpawn > config.spawnRate * 2) {
+        if (currentTime - this.lastItemSpawn > adjustedSpawnRate * 2) {
             this.lastItemSpawn = currentTime;
             if (Math.random() < 0.3) {
                 const type = Math.random() < 0.7 ? 'coin' : 'scroll';
@@ -451,12 +514,8 @@ class Game {
     }
 
     collectItem(item) {
-        if (item.type === 'coin') {
-            this.score += 10;
-        } else if (item.type === 'scroll') {
-            this.score += 100;
-        }
-        this.updateUI();
+        // Items collected but score is now survival time
+        // Could add bonus effects here in future (e.g., health restore)
     }
 
     levelComplete() {
@@ -562,9 +621,12 @@ class Ninja {
     }
 
     update(dt) {
+        // Scale physics with game speed so jumps complete faster at higher speeds
+        const speedScale = this.game.speedMultiplier;
+
         // Update physics - ALWAYS update physics for jumping
         if (this.isJumping) {
-            this.velocityY += this.gravity * dt;
+            this.velocityY += this.gravity * speedScale * dt;
             this.y += this.velocityY * dt;
 
             // Check if landed
@@ -586,8 +648,8 @@ class Ninja {
             this.currentAnimation = 'run';
         }
 
-        // Update animation frame
-        this.frameTimer += dt * 1000;
+        // Update animation frame (faster at higher speeds)
+        this.frameTimer += dt * 1000 * speedScale;
         if (this.frameTimer > this.frameInterval) {
             this.frameTimer = 0;
             this.frameX = (this.frameX + 1) % this.maxFrames;
@@ -636,25 +698,24 @@ class Ninja {
             ctx.fillText(this.currentAnimation.toUpperCase(), this.x + this.width/2, this.y + this.height/2);
         }
 
-        // Debug: Show hitbox (comment out in production)
-        if (false) {  // Set to true to see hitboxes
+        // Debug: Show hitbox
+        if (this.game.debug.showHitboxes || this.game.debug.showPlayerHitbox) {
             ctx.strokeStyle = 'lime';
             ctx.lineWidth = 2;
             ctx.strokeRect(this.x, this.y, this.width, this.height);
 
-            // Show slide status
-            if (this.isSliding) {
-                ctx.fillStyle = 'lime';
-                ctx.font = '12px Arial';
-                ctx.fillText('SLIDING', this.x + this.width/2, this.y - 10);
-            }
+            // Show dimensions and state
+            ctx.fillStyle = 'lime';
+            ctx.font = '10px Arial';
+            ctx.fillText(`${this.width}x${this.height}${this.isSliding ? ' SLIDE' : ''}`, this.x + this.width/2, this.y - 5);
         }
     }
 
     jump() {
         if (!this.isJumping && !this.isSliding) {
             this.isJumping = true;
-            this.velocityY = this.jumpPower;
+            // Scale jump power with game speed so jumps complete faster
+            this.velocityY = this.jumpPower * this.game.speedMultiplier;
             this.game.addEffect('dust_jump', this.x, this.groundY + this.height);
         }
     }
@@ -797,16 +858,16 @@ class Obstacle {
             ctx.fillText(this.type.toUpperCase(), this.x + this.width/2, this.y + this.height/2);
         }
 
-        // Debug: Show obstacle hitbox (set to true to debug)
-        if (false) {
+        // Debug: Show obstacle hitbox
+        if (this.game.debug.showHitboxes || this.game.debug.showObstacleHitboxes) {
             ctx.strokeStyle = this.type === 'branch' ? 'yellow' : 'red';
             ctx.lineWidth = 2;
             ctx.strokeRect(this.x, this.y, this.width, this.height);
 
-            // Show type label and position
+            // Show type label and dimensions
             ctx.fillStyle = 'white';
             ctx.font = '10px Arial';
-            ctx.fillText(`${this.type} Y:${Math.round(this.y)}`, this.x, this.y - 5);
+            ctx.fillText(`${this.type} ${this.width}x${this.height}`, this.x, this.y - 5);
         }
     }
 }
@@ -872,7 +933,7 @@ class Enemy {
         ctx.restore();
 
         // Debug: Show enemy hitbox
-        if (false) {  // Set to false to hide debug
+        if (this.game.debug.showHitboxes || this.game.debug.showEnemyHitboxes) {
             ctx.strokeStyle = 'orange';
             ctx.lineWidth = 2;
             ctx.strokeRect(this.x, this.y, this.width, this.height);

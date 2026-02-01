@@ -16,7 +16,7 @@
             <!-- Top UI Bar -->
             <div id="topBar">
                 <div id="scoreDisplay">
-                    <span class="label">SCORE</span>
+                    <span class="label">TIME</span>
                     <span id="score">0</span>
                 </div>
                 <div id="levelDisplay">
@@ -33,28 +33,14 @@
                 <button id="pauseBtn">⏸️</button>
             </div>
 
-            <!-- Touch Controls for Mobile/iPad -->
-            <div id="touchControls">
-                <button id="jumpBtn" class="controlBtn">
-                    <span>JUMP</span>
-                </button>
-                <button id="slideBtn" class="controlBtn">
-                    <span>SLIDE</span>
-                </button>
-                <button id="attackBtn" class="controlBtn">
-                    <span>ATTACK</span>
-                </button>
-            </div>
+            <!-- Touch hint overlay for mobile -->
+            <div id="touchHint"></div>
 
             <!-- Start Screen -->
             <div id="startScreen" class="screen">
                 <h1>NINJA RUNNER</h1>
-                <p>Controls:</p>
-                <div class="controls-info">
-                    <p><strong>SPACE</strong> - Jump</p>
-                    <p><strong>DOWN</strong> - Slide</p>
-                    <p><strong>F</strong> - Attack</p>
-                </div>
+                <p>Survive as long as you can!</p>
+                <p class="speed-note">Speed increases every 30 seconds</p>
                 <button id="startBtn" class="menuBtn">START GAME</button>
             </div>
 
@@ -68,7 +54,7 @@
             <!-- Game Over Screen -->
             <div id="gameOverScreen" class="screen" style="display: none;">
                 <h2>GAME OVER</h2>
-                <p>Final Score: <span id="finalScore">0</span></p>
+                <p>Survival Time: <span id="finalScore">0</span>s</p>
                 <p>Level Reached: <span id="finalLevel">1</span></p>
                 <button id="playAgainBtn" class="menuBtn">PLAY AGAIN</button>
             </div>
@@ -76,7 +62,7 @@
             <!-- Level Complete Screen -->
             <div id="levelCompleteScreen" class="screen" style="display: none;">
                 <h2>LEVEL COMPLETE!</h2>
-                <p>Score: <span id="levelScore">0</span></p>
+                <p>Survival Time: <span id="levelScore">0</span>s</p>
                 <button id="nextLevelBtn" class="menuBtn">NEXT LEVEL</button>
             </div>
         </div>
@@ -86,6 +72,24 @@
             <h2>LOADING...</h2>
             <div class="loader"></div>
             <p id="loadingProgress">0%</p>
+        </div>
+    </div>
+
+    <!-- Instructions below game -->
+    <div id="instructions">
+        <div class="instructions-content">
+            <div class="control-group">
+                <h3>Keyboard</h3>
+                <p><strong>SPACE</strong> - Jump</p>
+                <p><strong>DOWN</strong> - Slide</p>
+                <p><strong>F</strong> - Attack</p>
+            </div>
+            <div class="control-group">
+                <h3>Touch / Mobile</h3>
+                <p><strong>Swipe Up</strong> - Jump</p>
+                <p><strong>Swipe Down</strong> - Slide</p>
+                <p><strong>Tap</strong> - Attack</p>
+            </div>
         </div>
     </div>
 
