@@ -231,6 +231,8 @@ class Game {
         let touchStartY = 0;
         let touchStartX = 0;
         let touchStartTime = 0;
+        let isSliding = false;
+        let gestureTriggered = false;
         const touchHint = document.getElementById('touchHint');
 
         const showTouchHint = (text) => {
@@ -244,36 +246,58 @@ class Game {
             touchStartY = e.touches[0].clientY;
             touchStartX = e.touches[0].clientX;
             touchStartTime = Date.now();
+            gestureTriggered = false;
         }, { passive: false });
 
-        this.canvas.addEventListener('touchend', (e) => {
+        this.canvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
-            if (this.state !== 'playing') return;
+            if (this.state !== 'playing' || gestureTriggered) return;
 
-            const touchEndY = e.changedTouches[0].clientY;
-            const touchEndX = e.changedTouches[0].clientX;
-            const touchDuration = Date.now() - touchStartTime;
-            const deltaY = touchStartY - touchEndY;
-            const deltaX = Math.abs(touchStartX - touchEndX);
+            const touchCurrentY = e.touches[0].clientY;
+            const touchCurrentX = e.touches[0].clientX;
+            const deltaY = touchStartY - touchCurrentY;
+            const deltaX = Math.abs(touchStartX - touchCurrentX);
 
             const swipeThreshold = 30;
-            const tapThreshold = 10;
 
-            // Check if it's a swipe or tap
+            // Check if it's a vertical swipe
             if (Math.abs(deltaY) > swipeThreshold && Math.abs(deltaY) > deltaX) {
+                gestureTriggered = true;
                 if (deltaY > 0) {
                     // Swipe up - Jump
                     this.ninja.jump();
                     showTouchHint('JUMP');
                 } else {
-                    // Swipe down - Slide
+                    // Swipe down - Start sliding (hold until release)
                     this.ninja.startSlide();
+                    isSliding = true;
                     showTouchHint('SLIDE');
-                    // Auto-release slide after 500ms
-                    setTimeout(() => this.ninja.endSlide(), 500);
                 }
-            } else if (Math.abs(deltaY) < tapThreshold && Math.abs(deltaX) < tapThreshold && touchDuration < 300) {
-                // Tap - Attack
+            }
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+
+            // End slide when finger releases
+            if (isSliding) {
+                this.ninja.endSlide();
+                isSliding = false;
+                return;
+            }
+
+            if (this.state !== 'playing') return;
+
+            const touchEndY = e.changedTouches[0].clientY;
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchDuration = Date.now() - touchStartTime;
+            const deltaY = Math.abs(touchStartY - touchEndY);
+            const deltaX = Math.abs(touchStartX - touchEndX);
+
+            const tapThreshold = 15;
+
+            // If no gesture was triggered and it's a tap - Attack
+            if (!gestureTriggered && deltaY < tapThreshold && deltaX < tapThreshold && touchDuration < 300) {
                 this.ninja.attack();
                 showTouchHint('ATTACK');
             }
